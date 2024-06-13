@@ -25,8 +25,11 @@
               "GitHub.github-vscode-theme", // GitHub Theme
               // Python 関係
               "ms-python.python", // Python
-              "charliermarsh.ruff", // Ruff
               "ms-toolsai.jupyter", // Jupyter
+              "ms-python.isort", // Isort
+              "ms-python.mypy-type-checker", // Mypy
+              "charliermarsh.ruff", // Ruff
+              "LittleFoxTeam.vscode-python-test-adapter", // pytest
               // その他
               "njpwerner.autodocstring", // autoDocstring
               "aaron-bond.better-comments", // better-comments

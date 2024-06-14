@@ -1,4 +1,4 @@
-import matplotlib.pyplot as plt
+# import matplotlib.pyplot as plt
 import pandas as pd
 import tensorflow as tf
 from tensorflow.keras.optimizers import Adam
@@ -12,7 +12,8 @@ from src.utils import create_embedding_dict
 base_dir = "/home/user/core/data"
 
 # データ読み込み例
-data = pd.read_excel(f"{base_dir}/sample_merged_full.xlsx")
+# data = pd.read_excel(f"{base_dir}/sample_merged_full.xlsx")
+data = pd.read_excel(f"{base_dir}/merged_full_rating_conv.xlsx")
 
 # ラベルに不正な値が含まれている可能性があるので、削除
 cleaning_data = data[data["rating"].isin([0, 1, 2])]
@@ -35,8 +36,8 @@ cleaning_data = cleaning_data.drop(
 )
 
 # 特徴量とラベルの分離
-features = cleaning_data.drop(columns=["rating"])
-labels = cleaning_data["rating"]
+features = cleaning_data.drop(columns=["rating", "rating_conv"])
+labels = cleaning_data["rating_conv"]
 
 # データセット準備
 embedding_dims = {
@@ -66,17 +67,14 @@ embedding_dims = {
     "salary_target": 10,
 }
 
-
 # Preprocessorインスタンスの作成
 preprocessor = Preprocessor(features, embedding_dims)
 
 # vocabulariesの確認
 vocabularies = preprocessor.vocabularies
-# print(vocabularies)
 
 # feature_columnsの生成
 feature_columns = preprocessor.create_feature_columns()
-# print(feature_columns)
 
 # Embedding辞書の作成
 embedding_dict = create_embedding_dict(feature_columns)
@@ -87,16 +85,18 @@ processed_data = preprocessor.process(features)
 dataset = tf.data.Dataset.from_tensor_slices((dict(processed_data), labels))
 
 # データセットを訓練データと検証データに分割
-dataset_size = len(data)
+dataset_size = len(cleaning_data)
 train_size = int(0.8 * dataset_size)
-val_size = int(0.2 * dataset_size)
+val_size = dataset_size - train_size
 
+# シャッフルしてから分割
+dataset = dataset.shuffle(buffer_size=dataset_size)
 train_dataset = dataset.take(train_size)
-val_dataset = dataset.skip(train_size).take(val_size)
+val_dataset = dataset.skip(train_size)
 
 # モデルの訓練に適したようにデータセットをバッチ化
-train_dataset = train_dataset.batch(128)
-val_dataset = val_dataset.batch(128)
+train_dataset = train_dataset.batch(128).repeat()
+val_dataset = val_dataset.batch(128).repeat()
 
 # Two Towerモデルの定義
 layer_sizes = [128, 64, 32]
@@ -122,7 +122,6 @@ two_tower_model = TwoTowerModel(
     verbose=verbose,
 )
 
-
 # オプティマイザー
 optimizer = Adam(learning_rate=0.001)
 
@@ -147,7 +146,6 @@ def train_step(inputs, labels, verbose: bool = False):
                 "ラベルの範囲:", tf.reduce_min(labels), tf.reduce_max(labels)
             )
 
-        # loss = contrastive_loss(similarity, labels)
         # コサイン類似度に対する適切な損失関数を適用
         loss = tf.reduce_mean(
             tf.square(similarity - tf.cast(labels, tf.float32))
@@ -167,7 +165,6 @@ def train_step(inputs, labels, verbose: bool = False):
 @tf.function
 def val_step(inputs, labels):
     similarity = two_tower_model(inputs)
-    # loss = contrastive_loss(similarity, labels)
     loss = tf.reduce_mean(tf.square(similarity - tf.cast(labels, tf.float32)))
 
     val_loss_metric(loss)
@@ -179,49 +176,63 @@ train_accuracies = []
 val_losses = []
 val_accuracies = []
 
-# print(train_dataset)
-# print(val_dataset)
+steps_per_epoch = train_size // 128
+validation_steps = val_size // 128
 
 for epoch in range(epochs):
     print(f"Epoch {epoch + 1}/{epochs}")
 
     # 訓練データセットの反復
-    for batch in train_dataset:
+    for _ in range(steps_per_epoch):
+        batch = next(iter(train_dataset))
         inputs, labels = batch
         train_step(inputs, labels, verbose)
 
     # 訓練の損失と精度を記録
-    train_losses.append(train_loss_metric.result().numpy())
-    train_accuracies.append(train_accuracy_metric.result().numpy())
+    train_loss = train_loss_metric.result().numpy()
+    train_accuracy = train_accuracy_metric.result().numpy()
+    train_losses.append(train_loss)
+    train_accuracies.append(train_accuracy)
 
     # 検証データセットの評価
-    for val_batch in val_dataset:
+    for _ in range(validation_steps):
+        val_batch = next(iter(val_dataset))
         inputs, labels = val_batch
         val_step(inputs, labels)
 
     # 検証の損失と精度を記録
-    val_losses.append(val_loss_metric.result().numpy())
-    val_accuracies.append(val_accuracy_metric.result().numpy())
+    val_loss = val_loss_metric.result().numpy()
+    val_accuracy = val_accuracy_metric.result().numpy()
+    val_losses.append(val_loss)
+    val_accuracies.append(val_accuracy)
 
-    if (
-        epoch >= 20 and (epoch + 1) % 10 == 0
-    ):  # 最初の20エポックはスキップし、10エポックごとにグラフを更新
-        # プロット
-        plt.figure(figsize=(12, 4))
+    # エポックごとの損失と精度を表示
+    print(
+        f"Epoch {epoch + 1}: Train Loss: {train_loss}, Train Accuracy: {train_accuracy}"
+    )
+    print(
+        f"Epoch {epoch + 1}: Val Loss: {val_loss}, Val Accuracy: {val_accuracy}"
+    )
 
-        plt.subplot(1, 2, 1)
-        plt.plot(train_losses, label="Training Loss")
-        plt.plot(val_losses, label="Validation Loss")
-        plt.legend(loc="upper right")
-        plt.title("Training and Validation Loss")
+    # if (
+    #    epoch >= 20 and (epoch + 1) % 10 == 0
+    # ):  # 最初の20エポックはスキップし、10エポックごとにグラフを更新
+    # プロット
+    # plt.figure(figsize=(12, 4))
 
-        plt.subplot(1, 2, 2)
-        plt.plot(train_accuracies, label="Training Accuracy")
-        plt.plot(val_accuracies, label="Validation Accuracy")
-        plt.legend(loc="lower right")
-        plt.title("Training and Validation Accuracy")
+    # plt.subplot(1, 2, 1)
+    # plt.plot(train_losses, label="Training Loss")
+    # plt.plot(val_losses, label="Validation Loss")
+    # plt.legend(loc="upper right")
+    # plt.title("Training and Validation Loss")
 
-        plt.show()
+    # plt.subplot(1, 2, 2)
+    # plt.plot(train_accuracies, label="Training Accuracy")
+    # plt.plot(val_accuracies, label="Validation Accuracy")
+    # plt.legend(loc="lower right")
+    # plt.title("Training and Validation Accuracy")
+
+    # plt.show()
 
     # メトリックのリセット
     train_loss_metric.reset_state()
@@ -229,9 +240,11 @@ for epoch in range(epochs):
     val_loss_metric.reset_state()
     val_accuracy_metric.reset_state()
 
-# モデルの保存 (必要に応じて)
-two_tower_model.save(f"{base_dir}/two_tower_model.keras")
+# モデルの確認
+two_tower_model.summary()
 
+# モデルの保存
+two_tower_model.save(f"{base_dir}/two_tower_model.keras")
 
 # カスタムオブジェクトの登録
 tf.keras.utils.get_custom_objects().update(

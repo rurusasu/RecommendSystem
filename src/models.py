@@ -19,8 +19,11 @@ class UserModel(tf.keras.Model):
         use_bn: bool = False,
         use_ln: bool = False,
         verbose: bool = False,
+        name=None,  # nameパラメータを追加
+        trainable=True,
+        dtype=tf.float32,
     ):
-        super().__init__()
+        super().__init__(name=name, trainable=trainable, dtype=dtype)
         self.User_SE = LightSE(
             field_size=field_size, embedding_size=embedding_size
         )
@@ -35,6 +38,9 @@ class UserModel(tf.keras.Model):
         self.final_dense = tf.keras.layers.Dense(1)
         self.flatten = tf.keras.layers.Flatten()
         self.verbose = verbose
+
+    def build(self, input_shape):
+        super(UserModel, self).build(input_shape)
 
     def call(self, inputs: dict) -> tf.Tensor:
         sparse_embeddings, dense_values = create_sparse_embeddings(
@@ -113,8 +119,11 @@ class ItemModel(tf.keras.Model):
         use_bn: bool = False,
         use_ln: bool = False,
         verbose: bool = False,
+        name=None,  # nameパラメータを追加
+        trainable=True,
+        dtype=tf.float32,
     ):
-        super().__init__()
+        super().__init__(name=name, trainable=trainable, dtype=dtype)
         self.Item_SE = LightSE(
             field_size=field_size, embedding_size=embedding_size
         )
@@ -128,7 +137,10 @@ class ItemModel(tf.keras.Model):
         )
         self.final_dense = tf.keras.layers.Dense(1)
         self.flatten = tf.keras.layers.Flatten()
-        self.verbose = False
+        self.verbose = verbose
+
+    def build(self, input_shape):
+        super(ItemModel, self).build(input_shape)
 
     def call(self, inputs: dict) -> tf.Tensor:
         sparse_embeddings, dense_values = create_sparse_embeddings(
@@ -205,8 +217,11 @@ class TwoTowerModel(tf.keras.Model):
         use_bn: bool = False,
         use_ln: bool = False,
         verbose: bool = False,
+        name=None,  # nameパラメータを追加
+        trainable=True,
+        dtype=tf.float32,
     ):
-        super().__init__()
+        super().__init__(name=name, trainable=trainable, dtype=dtype)
         self.user_model = UserModel(
             layer_sizes,
             field_size,
@@ -230,6 +245,11 @@ class TwoTowerModel(tf.keras.Model):
             verbose=verbose,
         )
         self.verbose = verbose
+
+    def build(self, input_shape):
+        self.user_model.build(input_shape)  # ユーザーモデルの構築
+        self.item_model.build(input_shape)  # アイテムモデルの構築
+        super().build(input_shape)  # 必須です
 
     def call(self, inputs):
         user_inputs = {

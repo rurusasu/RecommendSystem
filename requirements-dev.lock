@@ -424,6 +424,8 @@ tornado==6.4.1
     # via jupyterlab
     # via notebook
     # via terminado
+tqdm==4.64.1
+    # via workspaces
 traitlets==5.14.3
     # via comm
     # via ipykernel

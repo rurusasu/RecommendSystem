@@ -1,8 +1,9 @@
-# import matplotlib.pyplot as plt
-import pandas as pd
-import pickle
 import tensorflow as tf
+import pickle
+import pandas as pd
 from tensorflow.keras.optimizers import Adam
+from tqdm import tqdm
+import datetime
 
 from src.feat import SparseFeat
 from src.layers import DNN, LightSE
@@ -16,7 +17,8 @@ base_dir = "/home/user/core/data"
 # data = pd.read_excel(f"{base_dir}/sample_merged_full.xlsx")
 #data = pd.read_excel(f"{base_dir}/merged_full_rating_conv.xlsx")
 
-with open(f"{base_dir}/sample_merged_full_rating_conv.pkl", "rb") as f:
+#with open(f"{base_dir}/sample_merged_full_rating_conv.pkl", "rb") as f:
+with open(f"{base_dir}/merged_full_rating_conv.pkl", "rb") as f:
     data = pickle.load(f)
 
 # ラベルに不正な値が含まれている可能性があるので、削除
@@ -137,6 +139,9 @@ train_accuracy_metric = tf.keras.metrics.CategoricalAccuracy(
 val_loss_metric = tf.keras.metrics.Mean(name="val_loss")
 val_accuracy_metric = tf.keras.metrics.CategoricalAccuracy(name="val_accuracy")
 
+# TensorBoardのセットアップ
+log_dir = f"{base_dir}/tensorborad_logs/fit/" + datetime.datetime.now().strftime("%Y%m%d-%H%M%S")
+tensorboard_callback = tf.keras.callbacks.TensorBoard(log_dir=log_dir, histogram_freq=1)
 
 # 訓練ステップ
 @tf.function
@@ -184,10 +189,9 @@ steps_per_epoch = train_size // 128
 validation_steps = val_size // 128
 
 for epoch in range(epochs):
-    print(f"Epoch {epoch + 1}/{epochs}")
 
     # 訓練データセットの反復
-    for _ in range(steps_per_epoch):
+    for _ in tqdm(range(steps_per_epoch), desc=f"Epoch {epoch + 1}/{epochs} - Training", leave=False):
         batch = next(iter(train_dataset))
         inputs, labels = batch
         train_step(inputs, labels, verbose)
@@ -199,7 +203,7 @@ for epoch in range(epochs):
     train_accuracies.append(train_accuracy)
 
     # 検証データセットの評価
-    for _ in range(validation_steps):
+    for _ in tqdm(range(validation_steps), desc=f"Epoch {epoch + 1}/{epochs} - Validation", leave=False):
         val_batch = next(iter(val_dataset))
         inputs, labels = val_batch
         val_step(inputs, labels)
@@ -210,13 +214,8 @@ for epoch in range(epochs):
     val_losses.append(val_loss)
     val_accuracies.append(val_accuracy)
 
-    # エポックごとの損失と精度を表示
-    print(
-        f"Epoch {epoch + 1}: Train Loss: {train_loss}, Train Accuracy: {train_accuracy}"
-    )
-    print(
-        f"Epoch {epoch + 1}: Val Loss: {val_loss}, Val Accuracy: {val_accuracy}"
-    )
+    # tqdmの更新
+    tqdm.write(f"Epoch {epoch + 1}: Train Loss: {train_loss:.4f}, Train Accuracy: {train_accuracy:.4f}, Val Loss: {val_loss:.4f}, Val Accuracy: {val_accuracy:.4f}")
 
     # if (
     #    epoch >= 20 and (epoch + 1) % 10 == 0
@@ -237,6 +236,13 @@ for epoch in range(epochs):
     # plt.title("Training and Validation Accuracy")
 
     # plt.show()
+
+    # TensorBoardのログ
+    with tf.summary.create_file_writer(log_dir).as_default():
+        tf.summary.scalar('Train Loss', train_loss, step=epoch)
+        tf.summary.scalar('Train Accuracy', train_accuracy, step=epoch)
+        tf.summary.scalar('Validation Loss', val_loss, step=epoch)
+        tf.summary.scalar('Validation Accuracy', val_accuracy, step=epoch)
 
     # メトリックのリセット
     train_loss_metric.reset_state()

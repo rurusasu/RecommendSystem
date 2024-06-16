@@ -29,6 +29,7 @@
                 "ms-python.mypy-type-checker", // Mypy
                 "charliermarsh.ruff", // Ruff
                 "LittleFoxTeam.vscode-python-test-adapter", // pytest
+                "ms-toolsai.tensorboard", // Tensorboard
                 // その他
                 "njpwerner.autodocstring", // autoDocstring
                 "aaron-bond.better-comments", // better-comments

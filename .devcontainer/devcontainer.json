@@ -1,12 +1,12 @@
 // See https://containers.dev/implementors/json_reference/ for configuration reference
 {
   "name": "core",
-  "dockerComposeFile": "../docker/gpu/docker-compose.yml",
+  "dockerComposeFile": "../docker/cpu/docker-compose.yml",
   "service": "core",
   "runArgs": [
 	 	"--gpus",
 	 	"all"
-	 ],
+	],
   "onCreateCommand": "rye config --set-bool behavior.use-uv=true && rye sync",
   "workspaceFolder": "/home/user/core",
   "workspaceMount": "source=${localWorkspaceFolder},target=/home/user/core,type=bind,consistency=cached",

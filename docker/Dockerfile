@@ -1,8 +1,8 @@
-ARG BASE_IMAGE=ubuntu:22.04
+ARG BASE_IMAGE=ubuntu:latest
 FROM ${BASE_IMAGE}
 
-ARG PROJECT_NAME=Kakeibo
-ARG USER_NAME=challenger
+#ARG PROJECT_NAME=Kakeibo
+#ARG USER_NAME=challenger
 #ARG GROUP_NAME=challengers
 #ARG UID=1000
 #ARG GID=1000

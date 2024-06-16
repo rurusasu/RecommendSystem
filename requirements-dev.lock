@@ -13,6 +13,7 @@ absl-py==2.1.0
     # via keras
     # via tensorboard
     # via tensorflow
+    # via tensorflow-recommenders
 anyio==4.4.0
     # via httpx
     # via jupyter-server
@@ -230,6 +231,7 @@ numpy==1.26.3
     # via opt-einsum
     # via pandas
     # via pyarrow
+    # via scann
     # via scikit-learn
     # via scipy
     # via tensorboard
@@ -365,6 +367,8 @@ rpds-py==0.18.1
     # via jsonschema
     # via referencing
 ruff==0.4.9
+scann==1.3.2
+    # via workspaces
 scikit-learn==1.5.0
     # via workspaces
 scipy==1.13.1
@@ -397,6 +401,10 @@ tensorboard==2.16.2
 tensorboard-data-server==0.7.2
     # via tensorboard
 tensorflow==2.16.1
+    # via scann
+    # via tensorflow-recommenders
+    # via workspaces
+tensorflow-recommenders==0.7.3
     # via workspaces
 termcolor==2.4.0
     # via tensorflow

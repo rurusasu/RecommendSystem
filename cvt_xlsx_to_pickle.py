@@ -2,7 +2,7 @@ import pickle
 
 import pandas as pd
 
-pickle_name = "sample_merged_full_rating_conv"
+pickle_name = "user_profile"
 base_dir = "/home/user/core/data"
 
 # エクセルファイルの読み込み

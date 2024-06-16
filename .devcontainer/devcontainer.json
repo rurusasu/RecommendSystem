@@ -1,48 +1,46 @@
 // See https://containers.dev/implementors/json_reference/ for configuration reference
 {
-  "name": "core",
-  "dockerComposeFile": "../docker/cpu/docker-compose.yml",
-  "service": "core",
-  "runArgs": [
-	 	"--gpus",
-	 	"all"
-	],
-  "onCreateCommand": "rye config --set-bool behavior.use-uv=true && rye sync",
-  "workspaceFolder": "/home/user/core",
-  "workspaceMount": "source=${localWorkspaceFolder},target=/home/user/core,type=bind,consistency=cached",
-
-  "customizations": {
-      "vscode": {
-          "settings": {
-              "editor.formatOnSave": true,
-              "python.defaultInterpreterPath": "${workspaceFolder}/.venv/bin/python",
-              "better-comments.multilineComments": true,
-              "better-comments.highlightPlainText": true
-          },
-          "extensions": [
-              // Theme
-              "PKief.material-icon-theme", // Material Icon Theme
-              "GitHub.github-vscode-theme", // GitHub Theme
-              // Python 関係
-              "ms-python.python", // Python
-              "ms-toolsai.jupyter", // Jupyter
-              "ms-python.isort", // Isort
-              "ms-python.mypy-type-checker", // Mypy
-              "charliermarsh.ruff", // Ruff
-              "LittleFoxTeam.vscode-python-test-adapter", // pytest
-              // その他
-              "njpwerner.autodocstring", // autoDocstring
-              "aaron-bond.better-comments", // better-comments
-              "usernamehw.errorlens", // Error Lens
-              "GrapeCity.gc-excelviewer", // Excel Viewer
-              "oderwat.indent-rainbow", // Indent Rainbow
-              "christian-kohler.path-intellisense", // Path Intellisense
-              "shardulm94.trailing-spaces", // Trailing Spaces
-              "mosapride.zenkaku" // Zenkaku
-          ]
-      }
-  },
-
-  // VSCodeを閉じた時、コンテナが自動停止するように指定
-  "shutdownAction": "stopContainer"
+    "name": "core",
+    "dockerComposeFile": "../docker/cpu/docker-compose.yml",
+    "service": "core",
+    "runArgs": [
+        "--gpus",
+        "all"
+    ],
+    "onCreateCommand": "rye config --set-bool behavior.use-uv=true && rye sync",
+    "workspaceFolder": "/home/user/core",
+    "workspaceMount": "source=${localWorkspaceFolder},target=/home/user/core,type=bind,consistency=cached",
+    "customizations": {
+        "vscode": {
+            "settings": {
+                "editor.formatOnSave": true,
+                "python.defaultInterpreterPath": "${workspaceFolder}/.venv/bin/python",
+                "better-comments.multilineComments": true,
+                "better-comments.highlightPlainText": true
+            },
+            "extensions": [
+                // Theme
+                "PKief.material-icon-theme", // Material Icon Theme
+                "GitHub.github-vscode-theme", // GitHub Theme
+                // Python 関係
+                "ms-python.python", // Python
+                "ms-toolsai.jupyter", // Jupyter
+                "ms-python.isort", // Isort
+                "ms-python.mypy-type-checker", // Mypy
+                "charliermarsh.ruff", // Ruff
+                "LittleFoxTeam.vscode-python-test-adapter", // pytest
+                // その他
+                "njpwerner.autodocstring", // autoDocstring
+                "aaron-bond.better-comments", // better-comments
+                "usernamehw.errorlens", // Error Lens
+                "GrapeCity.gc-excelviewer", // Excel Viewer
+                "oderwat.indent-rainbow", // Indent Rainbow
+                "christian-kohler.path-intellisense", // Path Intellisense
+                "shardulm94.trailing-spaces", // Trailing Spaces
+                "mosapride.zenkaku" // Zenkaku
+            ]
+        }
+    },
+    // VSCodeを閉じた時、コンテナが自動停止するように指定
+    "shutdownAction": "stopContainer"
 }

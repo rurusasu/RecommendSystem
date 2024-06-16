@@ -1,5 +1,6 @@
 # import matplotlib.pyplot as plt
 import pandas as pd
+import pickle
 import tensorflow as tf
 from tensorflow.keras.optimizers import Adam
 
@@ -13,7 +14,10 @@ base_dir = "/home/user/core/data"
 
 # データ読み込み例
 # data = pd.read_excel(f"{base_dir}/sample_merged_full.xlsx")
-data = pd.read_excel(f"{base_dir}/merged_full_rating_conv.xlsx")
+#data = pd.read_excel(f"{base_dir}/merged_full_rating_conv.xlsx")
+
+with open(f"{base_dir}/sample_merged_full_rating_conv.pkl", "rb") as f:
+    data = pickle.load(f)
 
 # ラベルに不正な値が含まれている可能性があるので、削除
 cleaning_data = data[data["rating"].isin([0, 1, 2])]

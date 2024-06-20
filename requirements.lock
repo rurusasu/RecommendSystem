@@ -64,6 +64,7 @@ markupsafe==2.1.5
     # via jinja2
     # via werkzeug
 matplotlib==3.9.0
+    # via recbole
     # via workspaces
 mdurl==0.1.2
     # via markdown-it-py
@@ -85,6 +86,7 @@ numpy==1.26.3
     # via opt-einsum
     # via pandas
     # via pyarrow
+    # via recbole
     # via scann
     # via scikit-learn
     # via scipy
@@ -128,6 +130,7 @@ packaging==22.0
     # via matplotlib
     # via tensorflow
 pandas==2.2.2
+    # via recbole
     # via workspaces
 pillow==10.2.0
     # via matplotlib
@@ -147,6 +150,10 @@ python-dateutil==2.9.0.post0
     # via pandas
 pytz==2024.1
     # via pandas
+pyyaml==6.0.1
+    # via recbole
+recbole==0.1.2
+    # via workspaces
 requests==2.28.1
     # via tensorflow
 rich==13.7.1
@@ -154,8 +161,10 @@ rich==13.7.1
 scann==1.3.2
     # via workspaces
 scikit-learn==1.5.0
+    # via recbole
     # via workspaces
 scipy==1.13.1
+    # via recbole
     # via scikit-learn
 setuptools==70.0.0
     # via tensorboard
@@ -183,8 +192,10 @@ termcolor==2.4.0
 threadpoolctl==3.5.0
     # via scikit-learn
 torch==2.3.1+cu121
+    # via recbole
     # via workspaces
 tqdm==4.64.1
+    # via recbole
     # via workspaces
 typing-extensions==4.9.0
     # via optree
